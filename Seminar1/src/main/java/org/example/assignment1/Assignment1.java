@@ -10,6 +10,7 @@ public class Assignment1 {
 
     public static String Decryption(int key, String ciphertext) {
         char[] plaintextChars = new char[ciphertext.length()];
+        key %= 26;
         // Process each character in the ciphertext.
         for (int i = 0; i < ciphertext.length(); i++) {
             char c = ciphertext.charAt(i);
@@ -28,7 +29,6 @@ public class Assignment1 {
         return new String(plaintextChars);
     }
 
-    // Encrypts the plaintext after normalizing it: removes non-alphabetic characters.
     public static String Encryption(int key, String plaintext) {
         String normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         char[] ciphertextChars = new char[normalizedPlaintext.length()];
@@ -54,63 +54,63 @@ public class Assignment1 {
     // Run assertion tests to verify that decryption correctly reverses encryption.
     public static void runAssertions() {
         int key = 3;
-        String plaintext = "Hello, World!";
+        String plaintext = "HELLO, WORLD!";
         String normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         String encrypted = Encryption(key, plaintext);
         String decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 5;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 7;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 9;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 11;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 13;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 17;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 19;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
         assert decrypted.equals(normalizedPlaintext)
                 : "Assertion failed: expected " + normalizedPlaintext + " but got " + decrypted;
         key = 23;
-        plaintext = "Hello, World!";
+        plaintext = "HELLO, WORLD!";
         normalizedPlaintext = plaintext.replaceAll("[^A-Z]", "");
         encrypted = Encryption(key, plaintext);
         decrypted = Decryption(key, encrypted);
@@ -123,9 +123,8 @@ public class Assignment1 {
         // Check if assertions are enabled.
         boolean assertsEnabled = false;
         assert assertsEnabled = true;
-        if (!assertsEnabled) {
+        if (!assertsEnabled)
             System.out.println("WARNING: Assertions are not enabled! Run the program with -ea option.");
-        }
 
         // Run the assertion tests.
         runAssertions();
