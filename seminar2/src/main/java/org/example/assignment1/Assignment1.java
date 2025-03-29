@@ -183,7 +183,7 @@ public class Assignment1 {
                 bestCandidateOverall = candidate;
             }
 
-            // If candidate meets the valid ratio threshold, update best candidate among these.
+            // If candidate meets the valid ratio threshold, update the best candidate among these.
             if (validRatio >= VALID_RATIO_THRESHOLD) {
                 candidateMeetingThresholdExists = true;
                 if (freqScore > bestFrequencyScore) {

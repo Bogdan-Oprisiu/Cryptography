@@ -1,10 +1,6 @@
 package org.example.assignment3;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Assignment3 {
 
@@ -33,13 +29,12 @@ public class Assignment3 {
     /**
      * Builds a mapping for a 5-bit A/D converter.
      * In this solution, we assign each letter a voltage value as follows:
-     * A -> -0.625 V, B -> -0.5625 V, ..., Z -> 0.9375 V.
      * (The step size is 0.0625 V between successive letters.)
      */
     private static Map<Character, Double> getSignalMapping5Bit() {
         Map<Character, Double> mapping = new HashMap<>();
-        double startVoltage = -0.625;  // Voltage for A
-        double step = 0.0625;          // Voltage increment per letter
+        double startVoltage = -1;  // Voltage for A
+        double step = (double) 1 / 16;      // Voltage increment per letter
         for (int i = 0; i < ALPHABET.length(); i++) {
             mapping.put(ALPHABET.charAt(i), startVoltage + i * step);
         }
