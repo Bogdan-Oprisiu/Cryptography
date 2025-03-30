@@ -3,7 +3,6 @@ package org.example.assignment3;
 import java.util.*;
 
 public class Assignment3 {
-
     // Standard alphabet (26 uppercase letters)
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -28,13 +27,21 @@ public class Assignment3 {
 
     /**
      * Builds a mapping for a 5-bit A/D converter.
-     * In this solution, we assign each letter a voltage value as follows:
-     * (The step size is 0.0625 V between successive letters.)
+     * Here we assign each letter a voltage value spanning from -1 V (for A) to +1 V (for a full-scale 5-bit value),
+     * but we only map the 26 letters. For our purposes, this means:
+     *
+     *   Voltage for A = -1.0 V
+     *   Voltage for B = -1.0 + (1/16) = -0.9375 V
+     *   ...
+     *   Voltage for Z = -1.0 + 25*(1/16) = 0.5625 V
+     *
+     * The step size is (endVoltage - startVoltage) / 32 = (1 - (-1)) / 32 = 2/32 = 0.0625 V.
      */
     private static Map<Character, Double> getSignalMapping5Bit() {
         Map<Character, Double> mapping = new HashMap<>();
-        double startVoltage = -1;  // Voltage for A
-        double step = (double) 1 / 16;      // Voltage increment per letter
+        double startVoltage = -1.0;  // Voltage for 00000 (A)
+        double endVoltage = 1.0;     // Voltage for 11111 (unused)
+        double step = (endVoltage - startVoltage) / 32; // 2/32 = 0.0625 V
         for (int i = 0; i < ALPHABET.length(); i++) {
             mapping.put(ALPHABET.charAt(i), startVoltage + i * step);
         }
@@ -48,7 +55,7 @@ public class Assignment3 {
         List<Double> analogSignal = new ArrayList<>();
         for (int i = 0; i < ciphertext.length(); i++) {
             char c = ciphertext.charAt(i);
-            // For letters not in our mapping, we default to 0 V.
+            // For characters not in our mapping, default to 0 V.
             if (mapping.containsKey(c)) {
                 analogSignal.add(mapping.get(c));
             } else {
@@ -76,10 +83,10 @@ public class Assignment3 {
 
         // Build the 5-bit A/D converter mapping for the 26 letters.
         Map<Character, Double> signalMapping = getSignalMapping5Bit();
-        System.out.println("Map voltage: " + signalMapping);
+        System.out.println("Voltage Mapping (5-bit A/D): " + signalMapping);
 
         // Convert the ciphertext into an analog signal using the mapping.
         List<Double> analogSignal = encryptToAnalog(ciphertext, signalMapping);
-        System.out.println("Encrypted Signal: " + analogSignal);
+        System.out.println("Encrypted Analog Signal: " + analogSignal);
     }
 }

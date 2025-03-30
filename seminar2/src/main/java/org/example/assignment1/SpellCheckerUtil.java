@@ -11,7 +11,7 @@ public class SpellCheckerUtil {
 
     public SpellCheckerUtil(String dictionaryPath) {
         try {
-            File dictFile = new File(dictionaryPath);
+            File dictFile = new File("C:/Uni/Cryptography/seminar2/src/main/resources/english.0");
             SpellDictionaryHashMap dictionary = new SpellDictionaryHashMap(dictFile);
             spellChecker = new SpellChecker(dictionary);
         } catch (IOException e) {

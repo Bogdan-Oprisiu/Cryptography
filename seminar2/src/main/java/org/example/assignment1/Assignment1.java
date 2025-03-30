@@ -194,13 +194,13 @@ public class Assignment1 {
                 }
             }
 
-            // Debug output: print candidate info.
-            System.out.println("Key " + key + ": " + candidate
-                    + " | Frequency Score: " + freqScore
-                    + " | Valid Ratio: " + validRatio);
+//            // Debug output: print candidate info.
+//            System.out.println("Key " + key + ": " + candidate
+//                    + " | Frequency Score: " + freqScore
+//                    + " | Valid Ratio: " + validRatio);
         }
 
-        System.out.println();
+//        System.out.println();
         if (candidateMeetingThresholdExists) {
             System.out.println("Likely decryption based on segmentation and frequency score:");
             System.out.println("Decryption Key: " + bestKey);

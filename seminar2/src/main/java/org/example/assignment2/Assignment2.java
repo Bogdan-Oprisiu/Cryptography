@@ -255,7 +255,6 @@ public class Assignment2 {
         System.out.println("Plaintext: " + bestPlaintext);
     }
 
-    // ******************* MAIN METHOD *******************
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter ciphertext: ");
