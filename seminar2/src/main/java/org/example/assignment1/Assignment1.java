@@ -38,8 +38,8 @@ public class Assignment1 {
     // Threshold for acceptable valid-word ratio from the spell checker.
     private static final double VALID_RATIO_THRESHOLD = 0.7;
 
-    // Fixed alphabet: English letters plus digits 0-9.
-    private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    // Fixed alphabet: English letters A-Z.
+    private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /**
      * Decrypts the ciphertext using a given key and alphabet.
@@ -139,83 +139,93 @@ public class Assignment1 {
 
     /**
      * Combines frequency scoring with spell-checker segmentation.
-     * It tries every possible key and uses both the frequency score and the ratio of valid segmented words.
+     * It tries every possible key for multiple alphabets (letters plus digits 1 to 9),
+     * and uses both the frequency score and the ratio of valid segmented words.
      */
     public static void HackShift(String cipherText) {
-        // Initialize the spell checker. Ensure the dictionary file (e.g., english.0)
-        // is placed in src/main/resources.
+        // Initialize the spell checker. Make sure the dictionary file path is correct for your environment.
         SpellCheckerUtil spellCheckerUtil = new SpellCheckerUtil("src/main/resources/english.0");
 
-        int bestKey = -1;               // Best key among candidates meeting valid ratio threshold.
-        double bestFrequencyScore = -1; // Best frequency score among candidates meeting threshold.
-        double bestValidRatio = -1;
-        String bestCandidate = "";
+        // We'll build up the alphabet cumulatively here:
+        String extendedAlphabet = ALPHABET; // start with just A-Z
 
-        int bestKeyOverall = -1;        // Best key overall (by frequency score)
-        double bestFrequencyScoreOverall = -1;
-        String bestCandidateOverall = "";
+        // Loop from digit 1..9, each time adding that digit to the existing extendedAlphabet
+        for (int digit = 0; digit <= 9; digit++) {
+            extendedAlphabet += digit;
+            System.out.println("----- For Extended Alphabet: " + extendedAlphabet + " -----");
 
-        boolean candidateMeetingThresholdExists = false;
+            // Tracking variables for this cumulatively extendedAlphabet:
+            int bestKeyForThisAlphabet = -1;
+            double bestFrequencyScoreForThisAlphabet = -1;
+            double bestValidRatioForThisAlphabet = -1;
+            String bestCandidateForThisAlphabet = "";
 
-        // Try each possible key.
-        for (int key = 0; key < ALPHABET.length(); key++) {
-            String candidate = decryptUsingKey(cipherText, key, ALPHABET);
-            double freqScore = calculateScore(candidate);
+            int bestKeyOverallForThisAlphabet = -1;
+            double bestFrequencyScoreOverallForThisAlphabet = -1;
+            String bestCandidateOverallForThisAlphabet = "";
 
-            // Use the segmentation method to split text into words.
-            String[] segmentedWords = segmentText(candidate, spellCheckerUtil);
-            double validRatio = 0.0;
-            if (segmentedWords.length > 0) {
-                int validCount = 0;
-                for (String word : segmentedWords) {
-                    // Count word as valid if it is all digits or if the spell checker confirms it's a valid English word.
-                    if (!word.isEmpty() && (word.matches("\\d+") || spellCheckerUtil.isEnglishWord(word))) {
-                        validCount++;
+            boolean candidateMeetingThresholdExistsForThisAlphabet = false;
+
+            // Try every possible key against the newly extended alphabet
+            for (int key = 0; key < extendedAlphabet.length(); key++) {
+                String candidate = decryptUsingKey(cipherText, key, extendedAlphabet);
+                double freqScore = calculateScore(candidate);
+
+                // Use segmentation to check valid words
+                String[] segmentedWords = segmentText(candidate, spellCheckerUtil);
+                double validRatio = 0.0;
+                if (segmentedWords.length > 0) {
+                    int validCount = 0;
+                    for (String word : segmentedWords) {
+                        // Count as valid if it’s all digits or recognized by the spell checker
+                        if (!word.isEmpty() && (word.matches("\\d+") || spellCheckerUtil.isEnglishWord(word))) {
+                            validCount++;
+                        }
+                    }
+                    validRatio = (double) validCount / segmentedWords.length;
+                }
+
+                // Update best overall candidate (by frequency) for this alphabet so far
+                if (freqScore > bestFrequencyScoreOverallForThisAlphabet) {
+                    bestFrequencyScoreOverallForThisAlphabet = freqScore;
+                    bestKeyOverallForThisAlphabet = key;
+                    bestCandidateOverallForThisAlphabet = candidate;
+                }
+
+                // If it meets the threshold, track the best among those that pass
+                if (validRatio >= VALID_RATIO_THRESHOLD) {
+                    candidateMeetingThresholdExistsForThisAlphabet = true;
+                    if (freqScore > bestFrequencyScoreForThisAlphabet) {
+                        bestFrequencyScoreForThisAlphabet = freqScore;
+                        bestKeyForThisAlphabet = key;
+                        bestCandidateForThisAlphabet = candidate;
+                        bestValidRatioForThisAlphabet = validRatio;
                     }
                 }
-                validRatio = (double) validCount / segmentedWords.length;
             }
 
-            // Update best overall candidate based on frequency score.
-            if (freqScore > bestFrequencyScoreOverall) {
-                bestFrequencyScoreOverall = freqScore;
-                bestKeyOverall = key;
-                bestCandidateOverall = candidate;
+            // After checking all keys for this extended alphabet, show the best results
+            if (candidateMeetingThresholdExistsForThisAlphabet) {
+                System.out.println("Likely decryption (segmentation + frequency) for alphabet " + extendedAlphabet + ":");
+                System.out.println("    Decryption Key:    " + bestKeyForThisAlphabet);
+                System.out.println("    Plaintext:         " + bestCandidateForThisAlphabet);
+                System.out.println("    Frequency Score:   " + bestFrequencyScoreForThisAlphabet);
+                System.out.println("    Valid Ratio:       " + bestValidRatioForThisAlphabet);
+            } else {
+                System.out.println("No candidate exceeded the threshold for alphabet " + extendedAlphabet + ".");
+                System.out.println("Best candidate by frequency score for this alphabet:");
+                System.out.println("    Decryption Key:    " + bestKeyOverallForThisAlphabet);
+                System.out.println("    Plaintext:         " + bestCandidateOverallForThisAlphabet);
+                System.out.println("    Frequency Score:   " + bestFrequencyScoreOverallForThisAlphabet);
             }
 
-            // If candidate meets the valid ratio threshold, update the best candidate among these.
-            if (validRatio >= VALID_RATIO_THRESHOLD) {
-                candidateMeetingThresholdExists = true;
-                if (freqScore > bestFrequencyScore) {
-                    bestFrequencyScore = freqScore;
-                    bestKey = key;
-                    bestCandidate = candidate;
-                    bestValidRatio = validRatio;
-                }
-            }
-
-//            // Debug output: print candidate info.
-//            System.out.println("Key " + key + ": " + candidate
-//                    + " | Frequency Score: " + freqScore
-//                    + " | Valid Ratio: " + validRatio);
-        }
-
-//        System.out.println();
-        if (candidateMeetingThresholdExists) {
-            System.out.println("Likely decryption based on segmentation and frequency score:");
-            System.out.println("Decryption Key: " + bestKey);
-            System.out.println("Plaintext: " + bestCandidate);
-            System.out.println("Frequency Score: " + bestFrequencyScore + " | Valid Ratio: " + bestValidRatio);
-        } else {
-            System.out.println("No candidate exceeded the spell checker threshold.");
-            System.out.println("Best candidate by frequency score:");
-            System.out.println("Decryption Key: " + bestKeyOverall);
-            System.out.println("Plaintext: " + bestCandidateOverall);
-            System.out.println("Frequency Score: " + bestFrequencyScoreOverall);
+            System.out.println(); // blank line between each block
         }
     }
 
+
     public static void main(String[] args) {
+        //Aer1vkdyhckdwv
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter ciphertext: ");
         String cipherText = scanner.nextLine().toUpperCase();

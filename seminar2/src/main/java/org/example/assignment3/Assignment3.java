@@ -29,12 +29,10 @@ public class Assignment3 {
      * Builds a mapping for a 5-bit A/D converter.
      * Here we assign each letter a voltage value spanning from -1 V (for A) to +1 V (for a full-scale 5-bit value),
      * but we only map the 26 letters. For our purposes, this means:
-     *
      *   Voltage for A = -1.0 V
      *   Voltage for B = -1.0 + (1/16) = -0.9375 V
      *   ...
      *   Voltage for Z = -1.0 + 25*(1/16) = 0.5625 V
-     *
      * The step size is (endVoltage - startVoltage) / 32 = (1 - (-1)) / 32 = 2/32 = 0.0625 V.
      */
     private static Map<Character, Double> getSignalMapping5Bit() {
