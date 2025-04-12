@@ -4,7 +4,7 @@ import static AES.AES128.*;
 
 public class AES256 {
 
-    // Nk=8, Nr=14, Nb=4 => 60 words
+    // AES-256 => Nk=8, Nr=14, Nb=4 => 60 words
     public static int[] expandKey256(byte[] key) {
         final int Nk = 8, Nr = 14, Nb = 4;
         int totalWords = Nb * (Nr + 1); // 60
@@ -24,7 +24,6 @@ public class AES256 {
             if (i % Nk == 0) {
                 temp = subWord(rotWord(temp)) ^ RCON[(i / Nk) - 1];
             } else if (i % Nk == 4) {
-                // AES-256 special case
                 temp = subWord(temp);
             }
             w[i] = w[i - Nk] ^ temp;
@@ -34,17 +33,15 @@ public class AES256 {
 
     public static byte[] encryptBlockDetailed256(byte[] plaintext, byte[] key) {
         final int Nr = 14;
-        int[] expandedWords = expandKey256(key);
+        final int Nk = 8;
+        int[] expanded = expandKey256(key);
         byte[][] state = bytesToState(plaintext);
 
         System.out.println("Encryption Phase (AES-256)\n");
-
-        // Round 0
-        addRoundKey(state, getRoundKey(expandedWords, 0));
+        addRoundKey(state, getRoundKey(expanded, 0, Nk));
         System.out.println("After addRoundKey(0):");
         System.out.println(byteArrayToHexString(stateToBytes(state)));
 
-        // Rounds 1..13
         for (int round = 1; round < Nr; round++) {
             subBytes(state);
             System.out.println("After subBytes (" + round + "):");
@@ -58,12 +55,12 @@ public class AES256 {
             System.out.println("After mixColumns (" + round + "):");
             System.out.println(byteArrayToHexString(stateToBytes(state)));
 
-            addRoundKey(state, getRoundKey(expandedWords, round));
+            addRoundKey(state, getRoundKey(expanded, round, Nk));
             System.out.println("After addRoundKey(" + round + "):");
             System.out.println(byteArrayToHexString(stateToBytes(state)));
         }
 
-        // Final round (14)
+        // Final Round (no mixColumns)
         subBytes(state);
         System.out.println("After subBytes (14):");
         System.out.println(byteArrayToHexString(stateToBytes(state)));
@@ -72,7 +69,7 @@ public class AES256 {
         System.out.println("After shiftRows (14):");
         System.out.println(byteArrayToHexString(stateToBytes(state)));
 
-        addRoundKey(state, getRoundKey(expandedWords, Nr));
+        addRoundKey(state, getRoundKey(expanded, Nr, Nk));
         String finalHex = byteArrayToHexString(stateToBytes(state));
         System.out.println("After addRoundKey(14):");
         System.out.println(finalHex);
@@ -84,17 +81,15 @@ public class AES256 {
 
     public static byte[] decryptBlockDetailed256(byte[] ciphertext, byte[] key) {
         final int Nr = 14;
-        int[] expandedWords = expandKey256(key);
+        final int Nk = 8;
+        int[] expanded = expandKey256(key);
         byte[][] state = bytesToState(ciphertext);
 
         System.out.println("Decryption Phase (AES-256)\n");
-
-        // Round 14
-        addRoundKey(state, getRoundKey(expandedWords, Nr));
+        addRoundKey(state, getRoundKey(expanded, Nr, Nk));
         System.out.println("After addRoundKey(14):");
         System.out.println(byteArrayToHexString(stateToBytes(state)));
 
-        // Rounds 13..1
         for (int round = Nr - 1; round >= 1; round--) {
             invShiftRows(state);
             System.out.println("After invShiftRows(" + round + "):");
@@ -104,7 +99,7 @@ public class AES256 {
             System.out.println("After invSubBytes(" + round + "):");
             System.out.println(byteArrayToHexString(stateToBytes(state)));
 
-            addRoundKey(state, getRoundKey(expandedWords, round));
+            addRoundKey(state, getRoundKey(expanded, round, Nk));
             System.out.println("After addRoundKey(" + round + "):");
             System.out.println(byteArrayToHexString(stateToBytes(state)));
 
@@ -113,7 +108,6 @@ public class AES256 {
             System.out.println(byteArrayToHexString(stateToBytes(state)));
         }
 
-        // Final round (0)
         invShiftRows(state);
         System.out.println("After invShiftRows(0):");
         System.out.println(byteArrayToHexString(stateToBytes(state)));
@@ -122,7 +116,7 @@ public class AES256 {
         System.out.println("After invSubBytes(0):");
         System.out.println(byteArrayToHexString(stateToBytes(state)));
 
-        addRoundKey(state, getRoundKey(expandedWords, 0));
+        addRoundKey(state, getRoundKey(expanded, 0, Nk));
         String recoveredHex = byteArrayToHexString(stateToBytes(state));
         System.out.println("After addRoundKey(0):");
         System.out.println(recoveredHex);
@@ -130,5 +124,18 @@ public class AES256 {
 
         printPlaintextMatrix(stateToBytes(state));
         return stateToBytes(state);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("=== AES-256 Column-Major Implementation Demo ===\n");
+
+        String keyHex = "0000000000000000000000000000000000000000000000000000000000000000";
+        String plaintextHex = "00112233445566778899AABBCCDDEEFF";
+
+        byte[] key = hexStringToByteArray(keyHex);
+        byte[] plaintext = hexStringToByteArray(plaintextHex);
+
+        byte[] encrypted = encryptBlockDetailed256(plaintext, key);
+        byte[] decrypted = decryptBlockDetailed256(encrypted, key);
     }
 }
