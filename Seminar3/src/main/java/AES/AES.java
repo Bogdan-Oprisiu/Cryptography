@@ -123,6 +123,7 @@ public class AES {
 
     /**
      * Encrypts plaintext in AES-CBC mode using a fixed all-zero IV.
+     * Debug prints are added to show each block's transformation.
      */
     public static byte[] encryptCBC(byte[] plaintext, int variant) {
         byte[] padded = padPKCS7(plaintext);
@@ -132,15 +133,23 @@ public class AES {
         byte[] iv = new byte[BLOCK_SIZE]; // all zero by default
 
         for (int i = 0; i < padded.length; i += BLOCK_SIZE) {
-            // XOR block with IV
+            System.out.println("=== Encryption: Processing Block " + (i / BLOCK_SIZE + 1) + " ===");
+
+            // Extract current block from padded plaintext
             byte[] block = new byte[BLOCK_SIZE];
             System.arraycopy(padded, i, block, 0, BLOCK_SIZE);
+            System.out.println("Original block (from padded plaintext): " + byteArrayToHexString(block));
 
+            // Show the current IV before XORing
+            System.out.println("Current IV: " + byteArrayToHexString(iv));
+
+            // XOR block with IV (this is the input to the AES encryption)
             for (int j = 0; j < BLOCK_SIZE; j++) {
                 block[j] ^= iv[j];
             }
+            System.out.println("Block after XOR with IV: " + byteArrayToHexString(block));
 
-            // Encrypt the block
+            // Encrypt the block using the appropriate AES variant
             byte[] enc;
             switch (variant) {
                 case 128:
@@ -164,34 +173,40 @@ public class AES {
                 default:
                     throw new IllegalArgumentException("Unsupported key size.");
             }
+            System.out.println("Encrypted block: " + byteArrayToHexString(enc));
 
-            // Copy encrypted block to ciphertext
+            // Copy encrypted block to ciphertext array
             System.arraycopy(enc, 0, ciphertext, i, BLOCK_SIZE);
 
-            // Update IV for next block
+            // Update IV for next block (chaining)
             iv = enc;
+            System.out.println();
         }
         return ciphertext;
     }
 
     /**
      * Decrypts ciphertext in AES-CBC mode using a fixed all-zero IV.
+     * Debug prints are added to show each block's transformation.
      */
     public static byte[] decryptCBC(byte[] ciphertext, int variant) {
         if (ciphertext.length % BLOCK_SIZE != 0) {
-            throw new IllegalArgumentException(
-                    "Ciphertext length must be multiple of block size."
-            );
+            throw new IllegalArgumentException("Ciphertext length must be multiple of block size.");
         }
 
         byte[] tmp = new byte[ciphertext.length];
-        byte[] iv = new byte[BLOCK_SIZE]; // zero IV again
+        byte[] iv = new byte[BLOCK_SIZE]; // zero IV
 
         for (int i = 0; i < ciphertext.length; i += BLOCK_SIZE) {
+            System.out.println("=== Decryption: Processing Block " + (i / BLOCK_SIZE + 1) + " ===");
+
+            // Get the current ciphertext block
             byte[] block = new byte[BLOCK_SIZE];
             System.arraycopy(ciphertext, i, block, 0, BLOCK_SIZE);
+            System.out.println("Ciphertext block: " + byteArrayToHexString(block));
+            System.out.println("Current IV: " + byteArrayToHexString(iv));
 
-            // Decrypt
+            // Decrypt the ciphertext block using the chosen AES variant
             byte[] dec;
             switch (variant) {
                 case 128:
@@ -215,19 +230,21 @@ public class AES {
                 default:
                     throw new IllegalArgumentException("Unsupported key size.");
             }
+            System.out.println("Decrypted block (before XOR): " + byteArrayToHexString(dec));
 
-            // XOR decrypted block with IV
+            // XOR decrypted block with IV to retrieve original plaintext block
             for (int j = 0; j < BLOCK_SIZE; j++) {
                 dec[j] ^= iv[j];
             }
+            System.out.println("Recovered plaintext block after XOR with IV: " + byteArrayToHexString(dec));
 
-            // Copy into tmp
+            // Copy resulting plaintext block into temporary array
             System.arraycopy(dec, 0, tmp, i, BLOCK_SIZE);
 
-            // Update IV = the original ciphertext block
+            // Update IV to be the current ciphertext block for next iteration
             iv = block;
+            System.out.println();
         }
-
         return unpadPKCS7(tmp);
     }
 
@@ -286,8 +303,7 @@ public class AES {
         System.out.println("Mode:               " + mode.toUpperCase());
         System.out.println("Plaintext (hex):    " + byteArrayToHexString(plaintext));
         System.out.println("Ciphertext length in bytes = " + ciphertext.length);
-        System.out.println("Ciphertext hex length = "
-                + byteArrayToHexString(ciphertext).length());
+        System.out.println("Ciphertext hex length = " + byteArrayToHexString(ciphertext).length());
         System.out.println("Ciphertext (hex): " + byteArrayToHexString(ciphertext));
         System.out.println("Recovered (hex):    " + byteArrayToHexString(recovered));
     }
