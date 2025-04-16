@@ -56,26 +56,19 @@ public class AES {
 
             byte[] enc;
             switch (variant) {
-                case 128:
-                    enc = AES128.encryptBlockDetailed(
-                            block,
-                            hexStringToByteArray(AES128_KEY)
-                    );
-                    break;
-                case 192:
-                    enc = AES192.encryptBlockDetailed192(
-                            block,
-                            hexStringToByteArray(AES192_KEY)
-                    );
-                    break;
-                case 256:
-                    enc = AES256.encryptBlockDetailed256(
-                            block,
-                            hexStringToByteArray(AES256_KEY)
-                    );
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported key size.");
+                case 128 -> enc = AES128.encryptBlockDetailed(
+                        block,
+                        hexStringToByteArray(AES128_KEY)
+                );
+                case 192 -> enc = AES192.encryptBlockDetailed192(
+                        block,
+                        hexStringToByteArray(AES192_KEY)
+                );
+                case 256 -> enc = AES256.encryptBlockDetailed256(
+                        block,
+                        hexStringToByteArray(AES256_KEY)
+                );
+                default -> throw new IllegalArgumentException("Unsupported key size.");
             }
             System.arraycopy(enc, 0, ciphertext, i, BLOCK_SIZE);
         }
@@ -91,26 +84,19 @@ public class AES {
 
             byte[] dec;
             switch (variant) {
-                case 128:
-                    dec = AES128.decryptBlockDetailed(
-                            block,
-                            hexStringToByteArray(AES128_KEY)
-                    );
-                    break;
-                case 192:
-                    dec = AES192.decryptBlockDetailed192(
-                            block,
-                            hexStringToByteArray(AES192_KEY)
-                    );
-                    break;
-                case 256:
-                    dec = AES256.decryptBlockDetailed256(
-                            block,
-                            hexStringToByteArray(AES256_KEY)
-                    );
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported key size.");
+                case 128 -> dec = AES128.decryptBlockDetailed(
+                        block,
+                        hexStringToByteArray(AES128_KEY)
+                );
+                case 192 -> dec = AES192.decryptBlockDetailed192(
+                        block,
+                        hexStringToByteArray(AES192_KEY)
+                );
+                case 256 -> dec = AES256.decryptBlockDetailed256(
+                        block,
+                        hexStringToByteArray(AES256_KEY)
+                );
+                default -> throw new IllegalArgumentException("Unsupported key size.");
             }
             System.arraycopy(dec, 0, tmp, i, BLOCK_SIZE);
         }
@@ -282,7 +268,7 @@ public class AES {
 
         // For demonstration: a test plaintext in hex
         // You could also let the user input this or read from file, etc.
-        String plaintextHex = "00112233445566778899AABBCCDDEEFF";
+        String plaintextHex = "00112233445566778899AABBCCDDEEFF0044";
         byte[] plaintext = hexStringToByteArray(plaintextHex);
 
         byte[] ciphertext;
