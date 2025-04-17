@@ -14,18 +14,16 @@ public class RSA_hack {
      * Returns [gcd, x, y] such that a*x + b*y = gcd(a, b)
      */
     private static int[] extendedEuclid(int a, int b) {
-        if (b == 0) {
-            return new int[]{a, 1, 0};
-        }
+        if (b == 0) return new int[]{a, 1, 0};
+
         int[] result = extendedEuclid(b, a % b);
         int gcd = result[0];
         int x1 = result[1];
         int y1 = result[2];
 
         // update x, y
-        int x = y1;
         int y = x1 - (a / b) * y1;
-        return new int[]{gcd, x, y};
+        return new int[]{gcd, y1, y};
     }
 
     /**
@@ -64,8 +62,6 @@ public class RSA_hack {
     /**
      * Decodes a single decrypted integer block (0 <= block < 26^3)
      * into its corresponding letter(s) in base-26.
-     * <p>
-     * We skip "leading zero" digits rather than always forcing 3 letters.
      */
     private static String decodeBlock(int block) {
         if (block == 0) {
@@ -95,9 +91,6 @@ public class RSA_hack {
     /**
      * Decrypt each block C using M = C^a mod n.
      * Then decode M as up to 3 letters in base-26 (skipping leading zeros).
-     * <p>
-     * Unlike the previous version, we do *not* remove trailing 'A' globally,
-     * so that a valid final 'A' (like in "VANILLA") is retained.
      */
     public static String hackRSA(int n, int b, String ciphertext) {
         // 1) Factor n to find p, q
@@ -141,9 +134,6 @@ public class RSA_hack {
     /**
      * Simple main that can read n, b, ciphertext from user,
      * call hackRSA, and show the plaintext result.
-     * <p>
-     * You can also hardcode n=18721, b=25, and ciphertext="365,0,4845,14930,2608,2608,0"
-     * if you like.
      */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
