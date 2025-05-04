@@ -6,10 +6,6 @@ import java.lang.Math; // Import Math for pow
 
 public class RSA {
 
-    /*************************************************************
-     * 1) CORE ALGORITHMS
-     *************************************************************/
-
     /**
      * Extended Euclidean Algorithm
      * Finds x, y such that a*x + b*y = gcd(a, b)
