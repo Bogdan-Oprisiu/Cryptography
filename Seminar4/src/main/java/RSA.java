@@ -2,27 +2,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-import java.lang.Math; // Import Math for pow
 
 public class RSA {
 
     /**
      * Extended Euclidean Algorithm
-     * Finds x, y such that a*x + b*y = gcd(a, b)
+     * Finds x, y such that a * x + b * y = gcd(a, b)
      * Returns array [gcd, x, y].
      */
     public static int[] extendedEuclid(int a, int b) {
-        if (b == 0) {
+        if (b == 0)
             return new int[]{a, 1, 0};
-        }
+
         int[] result = extendedEuclid(b, a % b);
         int gcd = result[0];
         int x1 = result[1];
         int y1 = result[2];
 
-        // Update x and y using results of recursion
+        // Update x, y
         int x = y1;
-        // Careful with integer division behavior
         int y = x1 - (a / b) * y1;
         return new int[]{gcd, x, y};
     }
@@ -57,11 +55,6 @@ public class RSA {
         }
         return (int) result;
     }
-
-
-    /*************************************************************
-     * 2) PADDING METHODS (PKCS-style in Z26) - Kept for robustness
-     *************************************************************/
 
     /**
      * PKCS-like padding in a Z26 context.
@@ -100,7 +93,7 @@ public class RSA {
      * 3. Remove them
      */
     private static String unpadPlaintextPKCS(String text) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return text; // nothing to unpad
         }
         char lastChar = text.charAt(text.length() - 1);
@@ -131,10 +124,6 @@ public class RSA {
         return text.substring(0, text.length() - padLen);
     }
 
-
-    /*************************************************************
-     * 3) BLOCK ENCODING / DECODING (Z26)
-     *************************************************************/
 
     /**
      * Convert text string into integer blocks based on Z26 encoding.
@@ -209,10 +198,6 @@ public class RSA {
         return sb.toString();
     }
 
-
-    /*************************************************************
-     * 4) RSA ENCRYPT / DECRYPT
-     *************************************************************/
 
     /**
      * RSA Encryption (with PKCS-like padding).
@@ -316,10 +301,6 @@ public class RSA {
     }
 
 
-    /*************************************************************
-     * 5) KEY GENERATION, HELPER, MAIN
-     *************************************************************/
-
     /**
      * Checks if the chosen blocklength is valid for RSA (26^blocklength < n).
      * Uses double for calculation to handle potentially large powers.
@@ -344,7 +325,7 @@ public class RSA {
     }
 
     /**
-     * Naive primality check (sufficient for small primes).
+     * Naive primality check.
      */
     private static boolean isPrime(int x) {
         if (x < 2) return false;
@@ -396,10 +377,6 @@ public class RSA {
 
         int p = getRandomPrime(p_min, p_max);
         int q = getRandomPrime(q_min, q_max);
-        // Ensure p and q are distinct (already guaranteed by non-overlapping ranges, but good practice)
-        // while (p == q) {
-        //     q = getRandomPrime(q_min, q_max);
-        // }
 
         int n = p * q;
         // Use long for phi calculation to avoid overflow if p, q are large
@@ -455,10 +432,6 @@ public class RSA {
 
         return new int[]{p, q, b, a};
     }
-
-
-    // --- autoBlockLength is not used directly in main ---
-
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -596,7 +569,7 @@ public class RSA {
                 // Check if the next input is an integer
                 if (!sc.hasNextInt()) {
                     System.out.println("Invalid input. Please enter an integer for block length.");
-                    sc.nextLine(); // <-- CORRECTED: Consume the entire invalid line
+                    sc.nextLine();
                     continue;      // Go back to the start of the loop
                 }
 
@@ -631,7 +604,6 @@ public class RSA {
             String plaintext = sc.nextLine().toUpperCase().replaceAll("[^A-Z]", "");
             if (plaintext.isEmpty()) {
                 System.out.println("Warning: Plaintext is empty after filtering.");
-                // Decide if encryption should proceed or exit
                 // Exiting for now, as encrypting empty string might be ambiguous
                 System.out.println("Exiting.");
             } else {

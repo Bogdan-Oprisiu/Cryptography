@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -62,6 +63,7 @@ public class RSA_hack {
     /**
      * Decodes a single decrypted integer block (0 <= block < 26^3)
      * into its corresponding letter(s) in base-26.
+     * n = 18721 so you have maximum 3 letter blocks
      */
     private static String decodeBlock(int block) {
         if (block == 0) {
@@ -137,15 +139,75 @@ public class RSA_hack {
      */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+        int n = 0;
+        int b = 0;
+        String ciphertext = "";
+        boolean validInput = false;
 
-        // Example usage:
-        int n = 18721;
-        int b = 25;
-        String ciphertext = "365,0,4845,14930,2608,2608,0";
+        System.out.println("--- RSA Hacking Tool ---");
+        System.out.print("Use example values (n=18721, b=25, ct=...) ? (y/n): ");
+        String choice = sc.nextLine().trim().toLowerCase();
 
-        String hackedPlaintext = hackRSA(n, b, ciphertext);
-        System.out.println("Recovered Plaintext (raw Z26 decode): " + hackedPlaintext);
+        if (choice.equals("y")) {
+            // Use predefined example values
+            n = 18721;
+            b = 25;
+            ciphertext = "365,0,4845,14930,2608,2608,0";
+            System.out.println("Using example values:");
+            System.out.println("  n = " + n);
+            System.out.println("  b = " + b);
+            System.out.println("  Ciphertext = " + ciphertext);
+            validInput = true;
+        } else {
+            // Get input from user
+            System.out.println("Please enter custom values:");
+            try {
+                System.out.print("Enter RSA modulus n: ");
+                n = sc.nextInt();
+
+                System.out.print("Enter public exponent b: ");
+                b = sc.nextInt();
+                sc.nextLine(); // Consume the newline left-over
+
+                System.out.print("Enter ciphertext (comma-separated numbers): ");
+                ciphertext = sc.nextLine();
+
+                // Basic validation
+                if (n <= 3) { // Need n large enough to factor
+                    System.err.println("Error: n must be greater than 3.");
+                } else if (b <= 1) { // Public exponent usually > 1
+                    System.err.println("Error: Public exponent b must be greater than 1.");
+                } else if (ciphertext == null || ciphertext.trim().isEmpty()) {
+                    System.err.println("Error: Ciphertext cannot be empty.");
+                } else {
+                    validInput = true;
+                }
+            } catch (InputMismatchException e) {
+                System.err.println("Error: Invalid input. Please enter integers for n and b.");
+                sc.nextLine(); // Consume the rest of the invalid line
+            } catch (Exception e) {
+                System.err.println("An unexpected error occurred during input: " + e.getMessage());
+            }
+        }
+
+        // Proceed only if we have valid input (either example or custom)
+        if (validInput) {
+            System.out.println("\nStarting RSA hack...");
+            try {
+                String hackedPlaintext = hackRSA(n, b, ciphertext);
+                System.out.println("\n-----------------------------------------");
+                System.out.println("Recovered Plaintext: " + hackedPlaintext);
+                System.out.println("-----------------------------------------");
+            } catch (Exception e) {
+                // Catch errors from hackRSA (e.g., factoring failure, non-coprime b/phi)
+                System.err.println("\nError during hacking process: " + e.getMessage());
+                // e.printStackTrace(); // Uncomment for detailed debug info
+            }
+        } else {
+            System.out.println("Cannot proceed without valid input values.");
+        }
 
         sc.close();
+        System.out.println("\nProgram finished.");
     }
 }
