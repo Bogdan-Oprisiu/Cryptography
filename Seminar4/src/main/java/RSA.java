@@ -218,7 +218,7 @@ public class RSA {
         String padded = padPlaintextPKCS(plaintext, blocklength);
         System.out.println("Padded text: " + padded); // Debugging: show padded text
 
-
+        // Convert text to blocks
         List<Integer> blocks = textToBlocks(padded, blocklength);
         List<Integer> encryptedBlocks = new ArrayList<>();
 
@@ -299,7 +299,6 @@ public class RSA {
         // Remove PKCS-like padding
         return unpadPlaintextPKCS(rawDecrypted);
     }
-
 
     /**
      * Checks if the chosen blocklength is valid for RSA (26^blocklength < n).
@@ -388,7 +387,6 @@ public class RSA {
         }
         int phi = (int) phi_long;
 
-
         Random rand = new Random();
         int b;
         int maxExponentAttempts = 1000;
@@ -448,7 +446,6 @@ public class RSA {
                 System.out.println("Please enter 'y' or 'n'.");
             }
         }
-
 
         int p = 0, q = 0, b = 0, a = 0;
         int n = 0; // Calculate n once
@@ -558,7 +555,6 @@ public class RSA {
 
         } // End else (manual input)
 
-
         // --- Proceed only if keys are valid ---
         if (keysValid) {
             int blocklength = 0;
@@ -599,7 +595,6 @@ public class RSA {
                 }
             } // End while (!blockLengthValid)
 
-
             System.out.println("Enter plaintext (A-Z only, others removed):");
             String plaintext = sc.nextLine().toUpperCase().replaceAll("[^A-Z]", "");
             if (plaintext.isEmpty()) {
@@ -639,7 +634,6 @@ public class RSA {
         } else {
             System.out.println("Cannot proceed without valid RSA keys.");
         }
-
 
         sc.close();
         System.out.println("Program finished.");

@@ -10,7 +10,7 @@ import java.security.SecureRandom;
 public final class SignDemo {
     public static void main(String[] args) {
         var kp = ElGamalKeyPair.fixed();
-        var sig = new ElGamalSigner(kp).sign("B".getBytes(StandardCharsets.US_ASCII), new SecureRandom());
+        var sig = new ElGamalSigner(kp).sign("B".getBytes(StandardCharsets.US_ASCII));
         boolean ok = new ElGamalVerifier(kp).verify("B", sig[0], sig[1]);
 
         System.out.printf("r = %s%n", sig[0]);

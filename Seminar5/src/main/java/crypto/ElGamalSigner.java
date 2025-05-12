@@ -2,60 +2,85 @@ package crypto;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.util.Objects;
 
 /**
- * Generates an (r, s) pair according to the ElGamal digital signature scheme.
+ * Generates ElGamal signature (r, s).
  */
 public final class ElGamalSigner {
 
+    // ElGamal key parameters (p, alpha, a, beta)
     private final ElGamalKeyPair kp;
-    private final MessageDigest sha256;
 
+    /**
+     * Constructor.
+     *
+     * @param kp The ElGamalKeyPair (p, alpha, private key 'a', beta). Not null.
+     */
     public ElGamalSigner(ElGamalKeyPair kp) {
-        this.kp = kp;
-        try {
-            this.sha256 = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 unavailable", e);
-        }
+        this.kp = Objects.requireNonNull(kp, "KeyPair cannot be null");
     }
 
     /**
-     * Signs the given message bytes.
+     * Signs message bytes using fixed k=45 and message byte as 'm' (no hashing).
      *
-     * @param message Bytes of the message; use {@code "B".getBytes(StandardCharsets.US_ASCII)} for the lab task.
-     * @param rng     Secure {@link SecureRandom} instance.
-     * @return a length‑2 array where {@code [0] = r} and {@code [1] = s}.
+     * @param message Bytes of the message (e.g., "B" -> [66] for Seminar 5).
+     * @return Signature [r, s].
+     * @throws IllegalArgumentException if k=45 is invalid for key params,
+     * or message is not a single byte, or m is out of range [0, p).
      */
-    public BigInteger[] sign(byte[] message, SecureRandom rng) {
-        BigInteger p = kp.p();
-        BigInteger pMinus1 = p.subtract(BigInteger.ONE);
+    public BigInteger[] sign(byte[] message) {
+        Objects.requireNonNull(message, "Message cannot be null");
 
-        // 1. Hash → integer m
-        BigInteger m = new BigInteger(1, sha256.digest(message));
+        // ElGamal parameters
+        BigInteger p = kp.p(); // Prime modulus
+        BigInteger pMinus1 = p.subtract(BigInteger.ONE); // p-1, for operations in Z_p-1^*
 
-        // 2. Choose random k, 1 < k < p‑1 with gcd(k, p‑1) = 1
-        BigInteger k;
-        do {
-            k = new BigInteger(p.bitLength() - 1, rng).mod(pMinus1);
-        } while (k.compareTo(BigInteger.ONE) <= 0 || !k.gcd(pMinus1).equals(BigInteger.ONE));
+        // Seminar Requirement: Fixed k=45.
+        BigInteger k = BigInteger.valueOf(45);
 
-        // 3. Compute r = alpha^k mod p
+        // Validate k: 0 < k < p-1 and gcd(k, p-1) = 1
+        if (k.compareTo(BigInteger.ZERO) <= 0 || k.compareTo(pMinus1) >= 0) {
+            throw new IllegalArgumentException("Fixed k=" + k + " must be in (0, p-1). p-1=" + pMinus1);
+        }
+        if (!k.gcd(pMinus1).equals(BigInteger.ONE)) {
+            throw new IllegalArgumentException("gcd(k, p-1) must be 1. k=" + k + ", p-1=" + pMinus1);
+        }
+        // For p=107 (from ElGamalKeyPair.fixed()), p-1=106. gcd(45, 106) = 1.
+
+        // 'B' (ASCII 66) -> m = 66.
+        BigInteger m = BigInteger.valueOf(message[0] & 0xFF); // Unsigned byte value
+        // Validate m: 0 <= m < p
+        if (m.compareTo(BigInteger.ZERO) < 0 || m.compareTo(p) >= 0) {
+            throw new IllegalArgumentException("Message integer m=" + m + " must be in [0, p). p=" + p);
+        }
+
+        // Step 3: Compute r = alpha^k mod p
         BigInteger r = kp.alpha().modPow(k, p);
 
-        // 4. Compute s = (m − a·r) · k^{-1} mod (p − 1)
-        BigInteger kInv = k.modInverse(pMinus1);
-        BigInteger s = kInv.multiply(m.subtract(kp.a().multiply(r))).mod(pMinus1);
+        // Step 4: Compute s = (m - a*r) * k^(-1) mod (p-1)
+        BigInteger kInv = k.modInverse(pMinus1);       // k^-1 mod (p-1)
+        BigInteger ar = kp.a().multiply(r);            // private key 'a' * r
+        BigInteger mMinusAr = m.subtract(ar);          // m - a*r
+        BigInteger product = kInv.multiply(mMinusAr);  // (m - a*r) * k^-1
+        BigInteger s = product.mod(pMinus1);           // result mod (p-1)
 
+        // Signature is the pair (r, s)
         return new BigInteger[]{r, s};
     }
 
-    // Convenience overloads --------------------------------------------------
-
+    /**
+     * Convenience overload: signs single-character ASCII string (fixed k=45, no hashing).
+     *
+     * @param asciiMessage Single-character ASCII string (e.g., "B").
+     * @return Signature [r, s].
+     */
     public BigInteger[] sign(String asciiMessage) {
-        return sign(asciiMessage.getBytes(StandardCharsets.US_ASCII), new SecureRandom());
+        Objects.requireNonNull(asciiMessage, "ASCII message cannot be null");
+        byte[] messageBytes = asciiMessage.getBytes(StandardCharsets.US_ASCII);
+        if (messageBytes.length != 1) { // Ensure it's a single character for this specific seminar setup
+            throw new IllegalArgumentException("Sign method (no hashing) expects a single-character ASCII string.");
+        }
+        return sign(messageBytes);
     }
 }
