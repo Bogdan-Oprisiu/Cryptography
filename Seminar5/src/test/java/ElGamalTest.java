@@ -1,13 +1,13 @@
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.nio.charset.StandardCharsets;
-
 import crypto.ElGamalKeyPair;
 import crypto.ElGamalSigner;
 import crypto.ElGamalVerifier;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for ElGamalKeyPair, ElGamalSigner and ElGamalVerifier.

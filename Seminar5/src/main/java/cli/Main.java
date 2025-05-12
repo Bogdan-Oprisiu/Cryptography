@@ -18,13 +18,14 @@ public final class Main {
     public static void main(String[] args) throws Exception {
 
         /* ----------------------------------------------------------------
-         * 1.  Sign the ASCII message "B"
+         * 1.  Sign the ASCII message
          * ---------------------------------------------------------------- */
         var kp = ElGamalKeyPair.fixed();
         var signer = new ElGamalSigner(kp);
         var verifier = new ElGamalVerifier(kp);
 
-        byte[] msg = "B".getBytes(StandardCharsets.US_ASCII);
+        byte[] msg = "Hello World".getBytes(StandardCharsets.US_ASCII);
+//        byte[] msg = "B".getBytes(StandardCharsets.US_ASCII);
         var rs = signer.sign(msg, new SecureRandom());
 
         System.out.println("ElGamal signature:");
@@ -45,8 +46,12 @@ public final class Main {
         /* ----------------------------------------------------------------
          * 3.  Embed 256-bit digest into an image
          * ---------------------------------------------------------------- */
-        BufferedImage cover = ImageIO.read(
-                Main.class.getResourceAsStream("/Tux.jfif")); // make sure it exists
+        BufferedImage originalCover = ImageIO.read(Main.class.getResourceAsStream("/Mickey.jfif"));
+        // Create a new BufferedImage with standard RGB type
+        BufferedImage cover = new BufferedImage(originalCover.getWidth(), originalCover.getHeight(), BufferedImage.TYPE_INT_RGB);
+        // Draw the original image onto the new one (this converts it)
+        cover.getGraphics().drawImage(originalCover, 0, 0, null);
+        // Now proceed with embedding using 'cover'
         byte[] digest256 = h.digest();
         BufferedImage stego = LSBSteganography.embed256(digest256, cover);
 

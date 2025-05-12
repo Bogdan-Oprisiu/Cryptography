@@ -7,9 +7,9 @@ import java.security.SecureRandom;
  * Immutable holder for El Gamal parameters.
  *
  * <ul>
- *   <li><b>p</b>     – prime modulus (lab: 107)</li>
- *   <li><b>alpha</b> – generator (lab: 122 503)</li>
- *   <li><b>a</b>     – private key (lab: 10)</li>
+ *   <li><b>p</b>     – prime modulus</li>
+ *   <li><b>alpha</b> – generator</li>
+ *   <li><b>a</b>     – private key</li>
  *   <li><b>beta</b>  – public key = alpha^a mod p</li>
  * </ul>
  */
